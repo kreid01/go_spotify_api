@@ -2,6 +2,8 @@ package controllers
 
 import (
 "net/http"
+    "github.com/lib/pq" 
+
 
 "github.com/gin-gonic/gin"
 "go_spotify_api/models"
@@ -64,6 +66,30 @@ func UpdateUser(c* gin.Context) {
 	models.DB.Model(&user).Updates(input)
   c.JSON(http.StatusOK, gin.H{"data": user})
 
+}
+
+func UpdateUserLikes(c* gin.Context) {
+	var user models.User;
+
+	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    		return
+	}
+
+	var input models.UpdateUserLikesInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+    	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    		return
+  	}
+
+	 user.Likes = append(user.Likes, input.Likes...)
+
+    if err := models.DB.Model(&user).Update("likes", pq.Array(user.Likes)).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update likes"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 func DeleteUser(c * gin.Context) {

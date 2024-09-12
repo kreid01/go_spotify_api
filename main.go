@@ -19,6 +19,7 @@ func main() {
 	router.GET("/users/:id", controllers.GetUser)
 	router.DELETE("/users/:id", controllers.DeleteUser)
 	router.PUT("/users/:id", controllers.UpdateUser)
+	router.PUT("/users/likes/:id", controllers.UpdateUserLikes)
 
 	router.GET("/playlists", controllers.GetPlaylists)
 	router.POST("/playlists", controllers.PostPlaylist)
