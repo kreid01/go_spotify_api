@@ -31,3 +31,9 @@ type DeleteUserLikesInput struct {
 	LikeId string `json:"likeId"`
 }
 
+type UpdateLikedAlbum struct {
+	AlbumId string `json:"albumId"`
+}
+
+
+

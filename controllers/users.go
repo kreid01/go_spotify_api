@@ -1,13 +1,11 @@
 package controllers
 
 import (
-"net/http"
-    "github.com/lib/pq" 
-    "fmt"
-
-
-"github.com/gin-gonic/gin"
-"go_spotify_api/models"
+        "net/http"
+        "github.com/lib/pq" 
+	
+	"github.com/gin-gonic/gin"
+	"go_spotify_api/models"
 )
 
 func PostUser(c *gin.Context) {
@@ -121,9 +119,6 @@ func DeleteUserLikes(c* gin.Context) {
 
 	user.Likes = Filter(user.Likes, func(str string) bool {return str != input.LikeId })
 
-	fmt.Print(user.Likes)
-	
-
     if err := models.DB.Model(&user).Update("likes", pq.Array(user.Likes)).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update likes"})
         return
@@ -132,6 +127,57 @@ func DeleteUserLikes(c* gin.Context) {
 
     c.JSON(http.StatusOK, gin.H{"data": user})
 }
+
+func UpdateLikedAlbum(c* gin.Context) {
+	var user models.User;
+
+	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    		return
+	}
+
+	var input models.UpdateLikedAlbum 
+	if err := c.ShouldBindJSON(&input); err != nil {
+    	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    		return
+  	}
+
+	user.LikedAlbums = append(user.LikedAlbums, input.AlbumId)
+
+    if err := models.DB.Model(&user).Update("liked_albums", pq.Array(user.LikedAlbums)).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update liked albums"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func DeleteLikedAlbum(c* gin.Context) {
+	var user models.User;
+
+	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    		return
+	}
+
+	var input models.UpdateLikedAlbum 
+	if err := c.ShouldBindJSON(&input); err != nil {
+    	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    		return
+  	}
+
+	user.LikedAlbums = Filter(user.LikedAlbums, func(str string) bool {return str != input.AlbumId })
+	
+
+    if err := models.DB.Model(&user).Update("liked_albums", pq.Array(user.LikedAlbums)).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update liked albums"})
+        return
+    }
+
+
+    c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
 
 func Filter(strings []string, predicate func(string) bool) []string {
 	var result []string
