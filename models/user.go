@@ -35,5 +35,9 @@ type UpdateLikedAlbum struct {
 	AlbumId string `json:"albumId"`
 }
 
+type UpdateFollowedArtistInput struct {
+	ArtistsId string `json:"artistId"`
+}
+
 
 

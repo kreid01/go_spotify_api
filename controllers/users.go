@@ -178,6 +178,56 @@ func DeleteLikedAlbum(c* gin.Context) {
     c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+func UpdateFollowedArtists(c* gin.Context) {
+	var user models.User;
+
+	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    		return
+	}
+
+	var input models.UpdateFollowedArtistInput 
+	if err := c.ShouldBindJSON(&input); err != nil {
+    	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    		return
+  	}
+
+	user.FollowedArtists = append(user.FollowedArtists, input.ArtistsId)
+
+    if err := models.DB.Model(&user).Update("followed_artists", pq.Array(user.FollowedArtists)).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update liked albums"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func DeleteFollowedArtist(c* gin.Context) {
+	var user models.User;
+
+	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    		return
+	}
+
+	var input models.UpdateFollowedArtistInput 
+	if err := c.ShouldBindJSON(&input); err != nil {
+    	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    		return
+  	}
+
+	user.FollowedArtists = Filter(user.FollowedArtists, func(str string) bool {return str != input.ArtistsId })
+	
+
+    if err := models.DB.Model(&user).Update("followed_artists", pq.Array(user.FollowedArtists)).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update liked albums"})
+        return
+    }
+
+
+    c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
 
 func Filter(strings []string, predicate func(string) bool) []string {
 	var result []string
