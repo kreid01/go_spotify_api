@@ -20,6 +20,7 @@ func main() {
 	router.DELETE("/users/:id", controllers.DeleteUser)
 	router.PUT("/users/:id", controllers.UpdateUser)
 	router.PUT("/users/likes/:id", controllers.UpdateUserLikes)
+	router.DELETE("/users/likes/:id", controllers.DeleteUserLikes)
 
 	router.GET("/playlists", controllers.GetPlaylists)
 	router.POST("/playlists", controllers.PostPlaylist)

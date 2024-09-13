@@ -3,6 +3,7 @@ package controllers
 import (
 "net/http"
     "github.com/lib/pq" 
+    "fmt"
 
 
 "github.com/gin-gonic/gin"
@@ -68,6 +69,18 @@ func UpdateUser(c* gin.Context) {
 
 }
 
+func DeleteUser(c * gin.Context) {
+	var user models.User
+
+	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    		return
+	}
+
+	models.DB.Delete(&user)
+	c.JSON(http.StatusOK, gin.H{"data": true})
+}
+
 func UpdateUserLikes(c* gin.Context) {
 	var user models.User;
 
@@ -76,7 +89,7 @@ func UpdateUserLikes(c* gin.Context) {
     		return
 	}
 
-	var input models.UpdateUserLikesInput
+	var input models.UpdateUserLikesInput	
 	if err := c.ShouldBindJSON(&input); err != nil {
     	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     		return
@@ -92,14 +105,41 @@ func UpdateUserLikes(c* gin.Context) {
     c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
-func DeleteUser(c * gin.Context) {
-	var user models.User
+func DeleteUserLikes(c* gin.Context) {
+	var user models.User;
 
 	if err := models.DB.Where("ID = ?", c.Param("id")).First(&user).Error; err != nil {
     		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
     		return
 	}
 
-	models.DB.Delete(&user)
-	c.JSON(http.StatusOK, gin.H{"data": true})
+	var input models.DeleteUserLikesInput 
+	if err := c.ShouldBindJSON(&input); err != nil {
+    	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    		return
+  	}
+
+	user.Likes = Filter(user.Likes, func(str string) bool {return str != input.LikeId })
+
+	fmt.Print(user.Likes)
+	
+
+    if err := models.DB.Model(&user).Update("likes", pq.Array(user.Likes)).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update likes"})
+        return
+    }
+
+
+    c.JSON(http.StatusOK, gin.H{"data": user})
 }
+
+func Filter(strings []string, predicate func(string) bool) []string {
+	var result []string
+	for _, string := range strings {
+		if predicate(string) {
+			result = append(result, string)
+		}
+	}
+	return result
+}
+
