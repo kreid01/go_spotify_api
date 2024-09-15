@@ -10,7 +10,7 @@ type User struct {
 	Name string `json:"name"`
 	Playlists  []Playlist `json:"playlists" gorm:"foreignKey:UserID"`
 	Likes pq.StringArray `json:"likes" gorm:"type:text[]"`
-	FollowedArtists pq.StringArray `json:"followedArists" gorm:"type:text[]"`
+	FollowedArtists pq.StringArray `json:"followedArtists" gorm:"type:text[]"`
 	LikedAlbums pq.StringArray `json:"likedAlbums" gorm:"type:text[]"`
 }
 
