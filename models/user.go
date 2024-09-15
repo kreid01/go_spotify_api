@@ -24,10 +24,6 @@ type UpdateUserInput struct {
 
 
 type UpdateUserLikesInput struct {
-	Likes []string `json:"likes" gorm:"type:json"`
-}
-
-type DeleteUserLikesInput struct {
 	LikeId string `json:"likeId"`
 }
 

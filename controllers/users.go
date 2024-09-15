@@ -93,7 +93,9 @@ func UpdateUserLikes(c* gin.Context) {
     		return
   	}
 
-	 user.Likes = append(user.Likes, input.Likes...)
+	 user.Likes = append(user.Likes, input.LikeId)
+
+	 print(user.Likes, input.LikeId)
 
     if err := models.DB.Model(&user).Update("likes", pq.Array(user.Likes)).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update likes"})
@@ -111,7 +113,7 @@ func DeleteUserLikes(c* gin.Context) {
     		return
 	}
 
-	var input models.DeleteUserLikesInput 
+	var input models.UpdateUserLikesInput 
 	if err := c.ShouldBindJSON(&input); err != nil {
     	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     		return
